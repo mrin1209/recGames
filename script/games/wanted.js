@@ -167,16 +167,26 @@ class Wanted extends Default {
       suspect.x += suspect.moveX;
       suspect.y += suspect.moveY;
 
-      if (suspect.x < 0 - this.#size) {
-        suspect.x = 390 + this.#size;
-      } else if (suspect.x > 390 + this.#size) {
-        suspect.x = 0 - this.#size;
-      }
-
-      if (suspect.y < 0 - this.#size) {
-        suspect.y = 390 + this.#size;
-      } else if (suspect.y > 390 + this.#size) {
-        suspect.y = 0 - this.#size;
+      if (false) {
+        if (suspect.x < 0 - this.#size || suspect.x > 390 + this.#size) {
+          suspect.moveX = -(suspect.moveX);
+        }
+  
+        if (suspect.y < 0 - this.#size || suspect.y > 390 + this.#size) {
+          suspect.moveY = -(suspect.moveY);
+        }
+      } else {
+        if (suspect.x < 0 - this.#size) {
+          suspect.x = 390 + this.#size;
+        } else if (suspect.x > 390 + this.#size) {
+          suspect.x = 0 - this.#size;
+        }
+  
+        if (suspect.y < 0 - this.#size) {
+          suspect.y = 390 + this.#size;
+        } else if (suspect.y > 390 + this.#size) {
+          suspect.y = 0 - this.#size;
+        }
       }
 
       controller.click(() => { this.judge(suspect.character); }, suspect.x, suspect.y, this.#size, this.#size);
