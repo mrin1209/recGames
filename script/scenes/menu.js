@@ -1,5 +1,6 @@
 class Menu extends Default {
   #games = {
+    'wanted':Wanted,
   };
 
   #titles = [];
