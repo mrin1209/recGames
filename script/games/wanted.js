@@ -13,6 +13,7 @@ class Wanted extends Default {
   #characterNum = 100;
   #margin = 20;
   #size = 30;
+  #reflection;
 
   preload(p) {
 
@@ -28,11 +29,13 @@ class Wanted extends Default {
         this.election();
         break;
       case 1:
+        const size = this.#size;
+        const characters = this.#characters;
         this.#suspects.forEach((suspect) => {
           this.move();
-          let color = this.#characters[suspect.character];
+          let color = characters[suspect.character];
           p.fill(color);
-          p.rect(suspect.x, suspect.y, this.#size, this.#size);
+          p.rect(suspect.x, suspect.y, size, this.#size);
         })
         break; 
       case 2:
@@ -73,21 +76,40 @@ class Wanted extends Default {
     let random;
     let moveX;
     let moveY;
-    let isRadial = false;
+    let moveMode;
+    let straightList = [];
 
     // 挙動選択
     random =  Math.floor( Math.random() * 3 );
     switch (random) {
       case 0: // 停止状態
+        moveMode = 'stop';
         moveX = 0;
         moveY = 0;
+        this.#reflection = false;
         break;
       case 1: // 直線移動
-        moveX = Math.random() * ( 0.01 - -0.01 ) + -0.01;
-        moveY = Math.random() * ( 0.01 - -0.01 ) + -0.01;
+        moveMode = 'straight';
+
+        Object.keys(this.#characters).forEach((character) => {
+          moveX = Math.random() * ( 0.01 - -0.01 ) + -0.01;
+          moveY = Math.random() * ( 0.01 - -0.01 ) + -0.01;
+
+          straightList[character] = {
+            'moveX':moveX,
+            'moveY':moveY
+          }
+        })
+        
+        this.#reflection = false;
         break;
       case 2: // 放射移動
-        isRadial = true;
+        moveMode = 'radial';
+        if (Math.floor( Math.random() * 2 )) {
+          this.#reflection = true;
+        } else {
+          this.#reflection = false;
+        }
         break;
       default:
         break;
@@ -102,8 +124,8 @@ class Wanted extends Default {
       // 座標計算
       while (judge) {
         if (this.#suspects.length <= 0) {
-          x = Math.floor( Math.random() * 390 );
-          y = Math.floor( Math.random() * 390 );
+          x = Math.floor( Math.random() * ( 390 + -this.#margin - this.#margin ) + this.#margin );
+          y = Math.floor( Math.random() * ( 390 + -this.#margin - this.#margin ) + this.#margin );
           break;
         } else {
           x = Math.floor( Math.random() * ( 390 + this.#margin - -this.#margin ) + -this.#margin );
@@ -117,14 +139,9 @@ class Wanted extends Default {
         }
       }
       
-      if (isRadial) {
-        moveX = Math.random() * ( 0.01 - -0.01 ) + -0.01;
-        moveY = Math.random() * ( 0.01 - -0.01 ) + -0.01;
-      }
-      
       // キャラクター選択
       judge = true;
-      if (count === 0) {
+      if (this.#suspects.length <= 0) {
         character = this.#culprit;
       } else {
         while (judge) {
@@ -137,13 +154,26 @@ class Wanted extends Default {
         character = characters[random];
       }
 
+      // 慣性計算
+      switch (moveMode) {
+        case 'straight':
+          moveX = straightList[character]['moveX'];
+          moveY = straightList[character]['moveY'];
+          break;
+        case 'radial':
+          moveX = Math.random() * ( 0.01 - -0.01 ) + -0.01;
+          moveY = Math.random() * ( 0.01 - -0.01 ) + -0.01;
+        default:
+          break;
+      }
+
       this.#suspects.push({
         'x':x,
         'y':y,
         'character':character,
         'moveX':moveX,
         'moveY':moveY,
-      })
+      });
     }
 
     this.#flow = 1;
@@ -167,7 +197,7 @@ class Wanted extends Default {
       suspect.x += suspect.moveX;
       suspect.y += suspect.moveY;
 
-      if (false) {
+      if (this.#reflection) {
         if (suspect.x < 0 - this.#size || suspect.x > 390 + this.#size) {
           suspect.moveX = -(suspect.moveX);
         }
