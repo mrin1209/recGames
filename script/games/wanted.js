@@ -10,13 +10,13 @@ class Wanted extends Default {
   #suspects = []; // 容疑者一覧
   #culprit; // 犯人
   #flow = 0;  // 0:容疑者選出 1:選別中 2:正解 3:ゲームオーバー
-  #characterNum = 100;
+  #characterNum = 1;
   #margin = 20;
   #size = 30;
   #reflection;
 
   preload(p) {
-
+    this.img1 = p.loadImage(`./assets/img/wanted.jpg`);
   }
 
   setup() {
@@ -27,16 +27,10 @@ class Wanted extends Default {
     switch (this.#flow) {
       case 0:
         this.election();
+        this.generate(p);
         break;
       case 1:
-        const size = this.#size;
-        const characters = this.#characters;
-        this.#suspects.forEach((suspect) => {
-          this.move();
-          let color = characters[suspect.character];
-          p.fill(color);
-          p.rect(suspect.x, suspect.y, size, this.#size);
-        })
+        p.drawSprites();
         break; 
       case 2:
         
@@ -64,12 +58,10 @@ class Wanted extends Default {
     const $random = Math.floor( Math.random() * $length );
 
     this.#culprit = $characters[$random];
-
-    this.generate();
   }
 
   // 座標生成
-  generate() {
+  generate(p) {
     const characterNum = this.#characterNum;
     const characters = Object.keys(this.#characters);
     const length = characters.length;
@@ -167,13 +159,12 @@ class Wanted extends Default {
           break;
       }
 
-      this.#suspects.push({
-        'x':x,
-        'y':y,
-        'character':character,
-        'moveX':moveX,
-        'moveY':moveY,
-      });
+      const suspect = p.createSprite(this.#size, this.#size, x, y);
+      suspect.addImage(this.img1);
+      suspect.setVelocity(moveX,moveY);
+      suspect.onMousePressed = ()=>{
+        console.log("wow!");
+      }
     }
 
     this.#flow = 1;
