@@ -62,6 +62,7 @@ class Wanted extends Default {
           p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
           this.count++;
         } else {
+          this.count = 0;
           this.flow++;
         }
         break;
@@ -74,13 +75,19 @@ class Wanted extends Default {
         });
 
         if (this.miss) {
-          console.log(this.miss);
           this.miss = false;
         }
         break;
       case 3:
-        p.background(255, 231, 66);
-        p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
+        if (this.count < 60) {
+          p.background(255, 231, 66);
+          p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
+          this.count++;
+        } else {
+          this.suspects = [];
+          this.count = 0;
+          this.flow = 0;
+        }
         break; 
       default:
         break;
