@@ -34,6 +34,8 @@ class Menu extends Default {
   }
   
   view(p) {
+    p.text(p.windowWidth,0,200);
+    p.text(p.windowHeight,0,220);
     this.#titles.forEach((title) => {
       const $image = title.image;
       
