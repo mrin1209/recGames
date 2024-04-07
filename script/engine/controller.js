@@ -10,11 +10,9 @@ class Controller {
   }
 
   load(p) {
-    let clicked = true;
     this.clickList.forEach(val => {
-      if (p.mouseX >= val.x && p.mouseX <= (val.x+val.w) && p.mouseY >= val.y && p.mouseY <= (val.y+val.h) && clicked) {
+      if (p.mouseX >= val.x && p.mouseX <= (val.x+val.w) && p.mouseY >= val.y && p.mouseY <= (val.y+val.h)) {
         val.func();
-        clicked = false;
       }
     });
   }

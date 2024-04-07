@@ -1,35 +1,40 @@
 class Wanted extends Default {
   characters = [
     {
-      'name':'red',
-      'img':[255,100,100],
-      'speed':0.025
+      'name':'mario',
+      'speed':3
     },
     {
-      'name':'green',
-      'img':[100,255,100],
-      'speed':0.02
+      'name':'yoshi',
+      'speed':2.5
     },
     {
-      'name':'blue',
-      'img':[100,100,255],
-      'speed':0.015
+      'name':'luigi',
+      'img':[69,178,69],
+      'speed':2
     },
     {
-      'name':'yellow',
-      'img':[255,255,0],
-      'speed':0.01
+      'name':'wario',
+      'img':[255,206,41],
+      'speed':1.5
     },
   ];
   suspects = []; // 容疑者一覧
   culprit; // 犯人
+  miss = false;
   flow = 0;  // 0:容疑者選出 1:選別中 2:正解 3:ゲームオーバー
-  margin = 30;
-  size = 35;
+  marginX = 29.5;
+  marginY = 30.5;
+  size = 50;
   reflection;
 
   preload(p) {
-
+    this.imgList = {
+      'mario':p.loadImage(`./assets/img/wanted/mario.png`),
+      'yoshi':p.loadImage(`./assets/img/wanted/yoshi.png`),
+      'luigi':p.loadImage(`./assets/img/wanted/luigi.png`),
+      'wario':p.loadImage(`./assets/img/wanted/wario.png`),
+    }
   }
 
   setup() {
@@ -37,20 +42,24 @@ class Wanted extends Default {
   }
 
   view(p) {
-    p.background(0);
+    p.fill(100);
+    p.rect(0, config.height, config.width, config.height);
 
     switch (this.flow) {
       case 0:
         this.election();
         break;
       case 1:
-        const size = this.size;
-        this.suspects.forEach((suspect) => {
-          p.fill(suspect.character.img);
-          p.rect(suspect.x, suspect.y + config.height, size, this.size);
+        controller.reset();
 
-          this.move();
-        })
+        this.suspects.forEach((suspect) => {
+          p.image(this.imgList[suspect.character], suspect.x, suspect.y + config.height, this.size, this.size);
+          this.move(suspect);
+        });
+
+        if (this.miss) {
+          this.miss = false;
+        }
         break; 
       case 2:
         
@@ -64,6 +73,7 @@ class Wanted extends Default {
 
     p.fill(0);
     p.rect(0, 0, config.width, config.height);
+    p.rect(0, config.height*2, config.width, config.height);
   }
 
   controller() {
@@ -79,7 +89,7 @@ class Wanted extends Default {
     const characters = this.characters.slice();
     const random = Math.floor( Math.random() * characters.length );
 
-    this.culprit = characters[random];
+    this.culprit = characters[random].name;
     characters.splice(random, 1);
 
     this.generate(characters);
@@ -89,8 +99,8 @@ class Wanted extends Default {
   generate(characters) {
     let moveMode;
     let probability;
-    let positionX = 0;
-    let positionY = 0;
+    let positionX = -7;
+    let positionY = -2;
     let x;
     let y;
     let moveX;
@@ -101,25 +111,28 @@ class Wanted extends Default {
 
     const charactersMove = this.setMove(moveMode);
 
-    for (let loopY = 0; loopY < 14; loopY++) {
+    for (let loopY = 0; loopY < 9; loopY++) {
       for (let loopX = 0; loopX < 13; loopX++) {
         if(Math.random() < probability){
-          positionX += this.margin;
+          positionX += this.marginX;
           continue;
         }
 
-        x = positionX + Math.random() * ( 5 - -5 ) + -5;
-        y = positionY +  Math.random() * ( 5 - -5 ) + -5;
+        x = positionX;
+        y = positionY;
 
-        positionX += this.margin;
+        x += Math.random() * ( 3 - -3 ) + -3;
+        y += Math.random() * ( 3 - -3 ) + -3;
+
+        positionX += this.marginX;
 
         this.suspects.push({
           'x':x,
           'y':y,
         });
       }
-      positionX = 0;
-      positionY += this.margin;
+      positionX = -7;
+      positionY += this.marginY;
     }
 
     this.suspects = this.arrayShuffle(this.suspects);
@@ -130,12 +143,12 @@ class Wanted extends Default {
         character = this.culprit;
       } else {
         let random = Math.floor( Math.random() * characters.length );
-        character = characters[random];
+        character = characters[random].name;
       }
 
       // 慣性計算
-      moveX = charactersMove[character['name']]['moveX'];
-      moveY = charactersMove[character['name']]['moveY'];
+      moveX = charactersMove[character]['moveX'];
+      moveY = charactersMove[character]['moveY'];
 
       if (moveMode === 'radial') {
         if (Math.floor( Math.random() * 2 )) {
@@ -168,22 +181,18 @@ class Wanted extends Default {
     switch (random) {
       case 0: // 停止状態
         moveMode = 'stop';
-        probability = 0.3;
+        probability = 0.15;
         reflection = false;
         break;
       case 1: // 直線移動
         moveMode = 'straight';
-        probability = 0.4;
+        probability = 0.05;
         reflection = false;
         break;
       case 2: // 放射移動
         moveMode = 'radial';
-        probability = 0.4;
-        if (Math.floor( Math.random() * 2 )) {
-          reflection = true;
-        } else {
-          reflection = false;
-        }
+        probability = 0.1;
+        reflection = true;
         break;
       default:
         break;
@@ -212,7 +221,7 @@ class Wanted extends Default {
   
         switch (direction[random]) {
           case 'top':
-            moveX = Math.random() * ( 0.005 - -0.005 ) + -0.005;
+            moveX = Math.random() * ( 1 - -0.5 ) + -0.5;
             moveY = character['speed'];
             
             if (Math.floor( Math.random() * 2 )) {
@@ -221,7 +230,7 @@ class Wanted extends Default {
             break;
           case 'left':
             moveX = character['speed'];
-            moveY = Math.random() * ( 0.005 - -0.005 ) + -0.005;
+            moveY = Math.random() * ( 1 - -0.5 ) + -0.5;
   
             if (Math.floor( Math.random() * 2 )) {
               moveX = -moveX;
@@ -233,9 +242,9 @@ class Wanted extends Default {
             moveY = character['speed'];
 
             if (Math.floor( Math.random() * 2 )) {
-              moveX -= Math.random() * ( 0.005 - -0.005 ) + -0.005;
+              moveX -= Math.random() * ( 1 - -0.5 ) + -0.5;
             } else {
-              moveY -= Math.random() * ( 0.005 - -0.005 ) + -0.005;
+              moveY -= Math.random() * ( 1 - -0.5 ) + -0.5;
             }
   
             if (direction[random] === 'top-left') {
@@ -259,21 +268,21 @@ class Wanted extends Default {
       } else if (moveMode === 'radial') {
         switch(Math.floor( Math.random() * 3 )) {
           case 0:
-            moveX = Math.random() * ( 0.01 - 0 ) + 0;
+            moveX = Math.random();
             moveY = character['speed'];
             break;
           case 1:
             moveX = character['speed'];
-            moveY = Math.random() * ( 0.01 - 0 ) + 0;
+            moveY = Math.random();
             break;
           case 2:
             moveX = character['speed'];
             moveY = character['speed'];
 
             if (Math.floor( Math.random() * 2 )) {
-              moveX -= Math.random() * 0.005;
+              moveX -= Math.random();
             } else {
-              moveY -= Math.random() * 0.005;
+              moveY -= Math.random();
             }
             break;
           default:
@@ -300,37 +309,33 @@ class Wanted extends Default {
     return array;
   }
 
-  move() {
-    controller.reset();
-
-    this.suspects.forEach((suspect) => {
-      suspect.x += suspect.moveX;
-      suspect.y += suspect.moveY;
-
-      if (this.reflection) {
-        if (suspect.x < 0 - this.size || suspect.x > config.width + this.size) {
-          suspect.moveX = -(suspect.moveX);
-        }
-  
-        if (suspect.y < 0 - this.size || suspect.y > config.height + this.size) {
-          suspect.moveY = -(suspect.moveY);
-        }
-      } else {
-        if (suspect.x < 0 - this.size) {
-          suspect.x = config.width + this.size;
-        } else if (suspect.x > config.height + this.size) {
-          suspect.x = 0 - this.size;
-        }
-  
-        if (suspect.y < 0 - this.size) {
-          suspect.y = config.width + this.size;
-        } else if (suspect.y > config.height + this.size) {
-          suspect.y = 0 - this.size;
-        }
+  move(suspect) {
+    suspect.x += suspect.moveX;
+    suspect.y += suspect.moveY;
+    
+    if (this.reflection) {
+      if (suspect.x < 0 - this.size || suspect.x > config.width) {
+        suspect.moveX = -(suspect.moveX);
       }
 
-      controller.click(() => { this.judge(suspect.character); }, suspect.x, suspect.y + config.height, this.size, this.size);
-    })
+      if (suspect.y < 0 - this.size || suspect.y > config.height) {
+        suspect.moveY = -(suspect.moveY);
+      }
+    } else {
+      if (suspect.x < 0 - this.size) {
+        suspect.x = config.width;
+      } else if (suspect.x > config.width) {
+        suspect.x = 0 - this.size;
+      }
+
+      if (suspect.y < 0 - this.size) {
+        suspect.y = config.height;
+      } else if (suspect.y > config.height) {
+        suspect.y = 0 - this.size;
+      }
+    }
+
+    controller.click(() => { this.judge(suspect.character); }, suspect.x, suspect.y + config.height, this.size, this.size);
   }
 
   // 正解判定
@@ -338,10 +343,10 @@ class Wanted extends Default {
     if(character === this.culprit) {
       this.suspects = [];
       controller.reset();
+      this.miss = false;
       this.flow = 0;
     } else {
-      
+      this.miss = character;
     }
   }
-
 }
