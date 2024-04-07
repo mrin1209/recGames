@@ -2,21 +2,21 @@ class Wanted extends Default {
   characters = [
     {
       'name':'mario',
-      'speed':3
+      'speed':2
     },
     {
       'name':'yoshi',
-      'speed':2.5
+      'speed':1.65
     },
     {
       'name':'luigi',
       'img':[69,178,69],
-      'speed':2
+      'speed':1.35
     },
     {
       'name':'wario',
       'img':[255,206,41],
-      'speed':1.5
+      'speed':1
     },
   ];
   suspects = []; // 容疑者一覧
