@@ -3,22 +3,22 @@ class Wanted extends Default {
     {
       'name':'red',
       'img':[255,100,100],
-      'speed':'0.03'
+      'speed':0.025
     },
     {
       'name':'green',
       'img':[100,255,100],
-      'speed':'0.025'
+      'speed':0.02
     },
     {
       'name':'blue',
       'img':[100,100,255],
-      'speed':'0.02'
+      'speed':0.015
     },
     {
       'name':'yellow',
       'img':[255,255,0],
-      'speed':'0.015'
+      'speed':0.01
     },
   ];
   suspects = []; // 容疑者一覧
@@ -46,7 +46,7 @@ class Wanted extends Default {
       case 1:
         const size = this.size;
         this.suspects.forEach((suspect) => {
-          p.fill(255, 100, 100);
+          p.fill(suspect.character.img);
           p.rect(suspect.x, suspect.y + config.height, size, this.size);
 
           this.move();
