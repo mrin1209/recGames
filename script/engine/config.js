@@ -1,4 +1,4 @@
 class Config {
-  width = 390;
-  height = 584 / 2;
+  width = 393;
+  height = 656;
 }

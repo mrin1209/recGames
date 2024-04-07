@@ -5,7 +5,7 @@ const games = new Games();
 
 const sketch = p => {
   p.setup = () => {
-    p.createCanvas(390,844);
+    p.createCanvas(config.width, config.height);
     p.frameRate(30);
     games.run(p,Menu);
     

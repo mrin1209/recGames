@@ -23,18 +23,26 @@ class Wanted extends Default {
   culprit; // 犯人
   miss = false;
   flow = 0;  // 0:容疑者選出 1:選別中 2:正解 3:ゲームオーバー
-  marginX = 29.5;
-  marginY = 30.5;
+  marginX = 29.8;
+  marginY = 30.3;
   size = 50;
   reflection;
+  count = 0;
 
   preload(p) {
-    this.imgList = {
-      'mario':p.loadImage(`./assets/img/wanted/mario.png`),
-      'yoshi':p.loadImage(`./assets/img/wanted/yoshi.png`),
-      'luigi':p.loadImage(`./assets/img/wanted/luigi.png`),
-      'wario':p.loadImage(`./assets/img/wanted/wario.png`),
-    }
+    this.backgroundImg = p.loadImage('./assets/img/wanted/background.png');
+    this.characterImgs = {
+      'mario':p.loadImage('./assets/img/wanted/characters/mario.png'),
+      'yoshi':p.loadImage('./assets/img/wanted/characters/yoshi.png'),
+      'luigi':p.loadImage('./assets/img/wanted/characters/luigi.png'),
+      'wario':p.loadImage('./assets/img/wanted/characters/wario.png'),
+    };
+    // this.suspectImgs = {
+    //   'mario':p.loadImage('./assets/img/wanted/suspects/mario.png'),
+    //   'yoshi':p.loadImage('./assets/img/wanted/suspects/yoshi.png'),
+    //   'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
+    //   'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
+    // }
   }
 
   setup() {
@@ -42,38 +50,48 @@ class Wanted extends Default {
   }
 
   view(p) {
-    p.fill(100);
-    p.rect(0, config.height, config.width, config.height);
-
     switch (this.flow) {
       case 0:
+        p.background(0);
         this.election();
         break;
       case 1:
+        p.background(0);
+        if (this.count < 60) {
+          p.image(this.backgroundImg, 0, 0);
+          p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
+          this.count++;
+        } else {
+          this.count = 0;
+          this.flow++;
+        }
+        break;
+      case 2:
         controller.reset();
-
+        p.background(0);
         this.suspects.forEach((suspect) => {
-          p.image(this.imgList[suspect.character], suspect.x, suspect.y + config.height, this.size, this.size);
+          p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size, this.size);
           this.move(suspect);
         });
 
         if (this.miss) {
           this.miss = false;
         }
-        break; 
-      case 2:
-        
         break;
       case 3:
-        
+        if (this.count < 60) {
+          p.background(255, 231, 66);
+          p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
+          this.count++;
+        } else {
+          this.suspects = [];
+          this.count = 0;
+          this.flow = 0;
+        }
         break; 
       default:
         break;
     }
-
-    p.fill(0);
-    p.rect(0, 0, config.width, config.height);
-    p.rect(0, config.height*2, config.width, config.height);
   }
 
   controller() {
@@ -99,8 +117,8 @@ class Wanted extends Default {
   generate(characters) {
     let moveMode;
     let probability;
-    let positionX = -7;
-    let positionY = -2;
+    let positionX = -8;
+    let positionY = 0;
     let x;
     let y;
     let moveX;
@@ -111,7 +129,7 @@ class Wanted extends Default {
 
     const charactersMove = this.setMove(moveMode);
 
-    for (let loopY = 0; loopY < 9; loopY++) {
+    for (let loopY = 0; loopY < 21; loopY++) {
       for (let loopX = 0; loopX < 13; loopX++) {
         if(Math.random() < probability){
           positionX += this.marginX;
@@ -121,8 +139,8 @@ class Wanted extends Default {
         x = positionX;
         y = positionY;
 
-        x += Math.random() * ( 3 - -3 ) + -3;
-        y += Math.random() * ( 3 - -3 ) + -3;
+        x += Math.random() * ( 2.5 - -2.5 ) + -2.5;
+        y += Math.random() * ( 2.5 - -2.5 ) + -2.5;
 
         positionX += this.marginX;
 
@@ -169,7 +187,7 @@ class Wanted extends Default {
       suspect['moveY'] = moveY;
     })
 
-    this.flow = 1;
+    this.flow++;
   }
 
   // 挙動選択
@@ -335,18 +353,18 @@ class Wanted extends Default {
       }
     }
 
-    controller.click(() => { this.judge(suspect.character); }, suspect.x, suspect.y + config.height, this.size, this.size);
+    controller.click(() => { this.judge(suspect); }, suspect.x, suspect.y, this.size, this.size);
   }
 
   // 正解判定
-  judge(character) {
-    if(character === this.culprit) {
-      this.suspects = [];
+  judge(suspect) {
+    if(suspect.character === this.culprit) {
       controller.reset();
+      this.suspects = suspect;
       this.miss = false;
-      this.flow = 0;
+      this.flow++;
     } else {
-      this.miss = character;
+      this.miss = suspect;
     }
   }
 }
