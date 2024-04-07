@@ -1,3 +1,4 @@
+const config = new Config();
 const controller = new Controller();
 const menu = new Menu();
 const games = new Games();
@@ -5,7 +6,7 @@ const games = new Games();
 const sketch = p => {
   p.setup = () => {
     p.createCanvas(390,844);
-    
+    p.frameRate(30);
     games.run(p,Menu);
     
   }
