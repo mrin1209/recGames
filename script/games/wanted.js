@@ -37,12 +37,12 @@ class Wanted extends Default {
       'luigi':p.loadImage('./assets/img/wanted/characters/luigi.png'),
       'wario':p.loadImage('./assets/img/wanted/characters/wario.png'),
     };
-    // this.suspectImgs = {
-    //   'mario':p.loadImage('./assets/img/wanted/suspects/mario.png'),
-    //   'yoshi':p.loadImage('./assets/img/wanted/suspects/yoshi.png'),
-    //   'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
-    //   'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
-    // }
+    this.suspectImgs = {
+      'mario':p.loadImage('./assets/img/wanted/suspects/mario.png'),
+      'yoshi':p.loadImage('./assets/img/wanted/suspects/yoshi.png'),
+      'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
+      'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
+    }
   }
 
   setup() {
@@ -62,7 +62,7 @@ class Wanted extends Default {
         }
 
         p.image(this.backgroundImg, 0, 0);
-        p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
+        p.image(this.suspectImgs[this.culprit], (config.width / 2) - 50, (config.height / 2) - 65, 100,100);
 
         if (this.count > 60) {
           this.count = 0;
