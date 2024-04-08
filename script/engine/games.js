@@ -15,6 +15,7 @@ class Games {
     p.clear();
     this.#scene.view(p);
     this.#scene.controller(p);
+    time.load();
   }
 
   // 一時停止
