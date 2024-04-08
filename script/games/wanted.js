@@ -52,21 +52,17 @@ class Wanted extends Default {
   view(p) {
     switch (this.flow) {
       case 0:
-        p.background(0);
-        this.election();
-        break;
-      case 1:
-        p.background(0);
-        if (this.count < 60) {
-          p.image(this.backgroundImg, 0, 0);
-          p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
-          this.count++;
-        } else {
+        if (this.count === 0) {
+          this.election();
+        } else if (this.count > 60) {
           this.count = 0;
           this.flow++;
         }
+        p.image(this.backgroundImg, 0, 0);
+        p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
+        this.count++;
         break;
-      case 2:
+      case 1:
         controller.reset();
         p.background(0);
         this.suspects.forEach((suspect) => {
@@ -78,12 +74,11 @@ class Wanted extends Default {
           this.miss = false;
         }
         break;
-      case 3:
-        if (this.count < 60) {
-          p.background(255, 231, 66);
-          p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
-          this.count++;
-        } else {
+      case 2:
+        p.background(255, 231, 66);
+        p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
+        this.count++;
+        if (this.count > 60) {
           this.suspects = [];
           this.count = 0;
           this.flow = 0;
@@ -186,8 +181,6 @@ class Wanted extends Default {
       suspect['moveX'] = moveX;
       suspect['moveY'] = moveY;
     })
-
-    this.flow++;
   }
 
   // 挙動選択
