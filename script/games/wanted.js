@@ -46,52 +46,98 @@ class Wanted extends Default {
   }
 
   setup() {
-    
+    time.set(
+      60,
+      'down',
+      () => { this.timeUp() },
+      60
+    );
   }
 
   view(p) {
     switch (this.flow) {
-      case 0:
-        p.background(0);
-        this.election();
-        break;
-      case 1:
-        p.background(0);
-        if (this.count < 60) {
-          p.image(this.backgroundImg, 0, 0);
-          p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
-          this.count++;
-        } else {
+      case 0: // 犯人選出
+        if (this.count === 0) {
+          this.election();
+        }
+
+        p.image(this.backgroundImg, 0, 0);
+        p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
+
+        if (this.count > 60) {
           this.count = 0;
-          this.flow++;
+          this.flow = 1;
+          time.start();
+        } else {
+          this.count++;
         }
         break;
-      case 2:
+      case 1: // プレイ中
         controller.reset();
         p.background(0);
+
         this.suspects.forEach((suspect) => {
-          p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size, this.size);
+          if (suspect['view']) {
+            p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size, this.size);
+          }
+
+          if (suspect['miss']) {
+            if (suspect['missCount'] > 30) {
+              suspect['miss'] = false;
+              suspect['view'] = true;
+              suspect['missCount'] = 0;
+            } else if (suspect['missCount'] % 2 === 0) {
+              suspect['view'] = !suspect['view'];
+            }
+            suspect['missCount']++;
+          }
+
           this.move(suspect);
         });
 
         if (this.miss) {
+          time.edit(-10);
+          this.miss['miss'] = true;
           this.miss = false;
         }
         break;
-      case 3:
-        if (this.count < 60) {
-          p.background(255, 231, 66);
-          p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
-          this.count++;
+      case 2: // 答え合わせ
+        if (this.count === 0) {
+          controller.reset();
+          time.stop();
+        }
+
+        p.background(255, 231, 66);
+        p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
+
+        if (time.get() > 0) {
+          if (this.count > 60) {
+            time.edit(5);
+            this.suspects = [];
+            this.count = 0;
+            this.miss = false;
+            this.flow = 0;
+          } else {
+            this.count++;
+          }
         } else {
-          this.suspects = [];
-          this.count = 0;
-          this.flow = 0;
+          p.fill(255);
+          p.textSize(30);
+          p.strokeWeight(10);
+          p.stroke(0);
+          p.textAlign(p.CENTER);
+          p.text('Game Over', config.width / 2, config.height / 2);
         }
         break; 
       default:
         break;
     }
+    p.fill(255);
+    p.textSize(30);
+    p.strokeWeight(10);
+    p.stroke(0);
+    p.textAlign(p.LEFT, p.TOP);
+    p.text(time.get(), 5, 5);
   }
 
   controller() {
@@ -118,7 +164,7 @@ class Wanted extends Default {
     let moveMode;
     let probability;
     let positionX = -8;
-    let positionY = 0;
+    let positionY = this.marginY;
     let x;
     let y;
     let moveX;
@@ -129,7 +175,7 @@ class Wanted extends Default {
 
     const charactersMove = this.setMove(moveMode);
 
-    for (let loopY = 0; loopY < 21; loopY++) {
+    for (let loopY = 0; loopY < 20; loopY++) {
       for (let loopX = 0; loopX < 13; loopX++) {
         if(Math.random() < probability){
           positionX += this.marginX;
@@ -185,9 +231,10 @@ class Wanted extends Default {
       suspect['character'] = character;
       suspect['moveX'] = moveX;
       suspect['moveY'] = moveY;
+      suspect['view'] = true;
+      suspect['miss'] = false;
+      suspect['missCount'] = 0;
     })
-
-    this.flow++;
   }
 
   // 挙動選択
@@ -366,5 +413,10 @@ class Wanted extends Default {
     } else {
       this.miss = suspect;
     }
+  }
+
+  timeUp() {
+    this.suspects = this.suspects[0];
+    this.flow = 2;
   }
 }
