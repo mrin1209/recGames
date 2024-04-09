@@ -28,7 +28,9 @@ class Wanted extends Default {
   size = 50;
   reflection;
   count = 0;
-  lightSize = 300;
+  setUp = false;
+  viewText = false;
+  lightSize = 250;
   lightSpeed = 20;
   lightMove = 0;
   light = {
@@ -50,6 +52,7 @@ class Wanted extends Default {
       'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
       'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
     }
+    this.touch_to_start = p.loadImage('./assets/img/common/touch_to_start.png');
   }
 
   setup() {
@@ -59,31 +62,21 @@ class Wanted extends Default {
       () => { this.timeUp() },
       60
     );
+
+    this.election();
   }
 
   view(p) {
     switch (this.flow) {
       case 0: // 犯人選出
-        if (this.count === 0) {
-          this.election();
-          this.count++;
-        }
-
         p.background(0);
-        
-        p.fill(255); // 黒い円を描画
+
+        p.push();
+        p.beginClip();
         p.ellipse(this.light['left'], config.height / 2, this.lightSize, this.lightSize);
-
-        p.push();
-        p.drawingContext.clip();
-        p.imageMode(p.CENTER);
-        p.image(this.backgroundImg, (config.width / 2), (config.height / 2), config.width, this.backgroundImg.height + (config.width - this.backgroundImg.width ) );
-        p.image(this.suspectImgs[this.culprit], (config.width / 2), (config.height / 2) - 17, 115, 115);
-        p.pop();
-
         p.ellipse(this.light['right'], config.height / 2, this.lightSize, this.lightSize);
-        p.push();
-        p.drawingContext.clip();
+        p.endClip();
+
         p.imageMode(p.CENTER);
         p.image(this.backgroundImg, (config.width / 2), (config.height / 2), config.width, this.backgroundImg.height + (config.width - this.backgroundImg.width ) );
         p.image(this.suspectImgs[this.culprit], (config.width / 2), (config.height / 2) - 17, 115, 115);
@@ -109,14 +102,36 @@ class Wanted extends Default {
             }
             break;
           case 2:
-            controller.click(() => {
-              this.light['left'] = config.width + (this.lightSize / 2);
-              this.light['right'] = -(this.lightSize / 2);
-              this.lightMove = 1;
-              this.flow = 1;
+            if (!this.setUp) {
+              controller.click(() => {
+                this.light['left'] = config.width + (this.lightSize / 2);
+                this.light['right'] = -(this.lightSize / 2);
+                this.lightMove = 1;
+                this.flow = 1;
+                this.count = 0;
+                this.setUp = false;
+                time.start();
+              });
+              this.setUp = true;
+            }
+
+            this.count++;
+            if (this.count < 20)  {
+              this.viewText = true;
+            } else if (this.count < 40)  {
+              this.viewText = false;
+            } else if (this.count > 40)  {
               this.count = 0;
-              time.start();
-            });
+            }
+
+            if (this.viewText) {
+              p.image(
+                this.touch_to_start,
+                config.width - this.touch_to_start.width - 10,
+                config.height - this.touch_to_start.height - 10
+              );
+            }
+            
             break;
           default:
             break;
@@ -159,19 +174,21 @@ class Wanted extends Default {
         p.text(time.get(), 5, 5);
         break;
       case 2: // 答え合わせ
-        if (this.count === 0) {
+        if (!this.setUp) {
           controller.reset();
           time.stop();
+          this.setUp = true;
         }
 
         p.background(255, 231, 66);
         p.image(this.characterImgs[this.suspects.character], this.suspects.x, this.suspects.y, this.size, this.size);
 
         if (time.get() > 0) {
-          if (this.count > 60) {
+          if (this.count > 90) {
+            this.election();
             time.edit(5);
-            this.suspects = [];
             this.count = 0;
+            this.setUp = false;
             this.miss = false;
             this.flow = 0;
           } else {
@@ -212,6 +229,7 @@ class Wanted extends Default {
 
   // 座標生成
   generate(characters) {
+    this.suspects = [];
     let moveMode;
     let probability;
     let positionX = -8;
