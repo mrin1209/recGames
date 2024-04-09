@@ -28,6 +28,13 @@ class Wanted extends Default {
   size = 50;
   reflection;
   count = 0;
+  lightSize = 300;
+  lightSpeed = 20;
+  lightMove = 0;
+  light = {
+    'left': -(this.lightSize / 2),
+    'right': config.width + (this.lightSize / 2)
+  }
 
   preload(p) {
     this.backgroundImg = p.loadImage('./assets/img/wanted/background.png');
@@ -37,12 +44,12 @@ class Wanted extends Default {
       'luigi':p.loadImage('./assets/img/wanted/characters/luigi.png'),
       'wario':p.loadImage('./assets/img/wanted/characters/wario.png'),
     };
-    // this.suspectImgs = {
-    //   'mario':p.loadImage('./assets/img/wanted/suspects/mario.png'),
-    //   'yoshi':p.loadImage('./assets/img/wanted/suspects/yoshi.png'),
-    //   'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
-    //   'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
-    // }
+    this.suspectImgs = {
+      'mario':p.loadImage('./assets/img/wanted/suspects/mario.png'),
+      'yoshi':p.loadImage('./assets/img/wanted/suspects/yoshi.png'),
+      'luigi':p.loadImage('./assets/img/wanted/suspects/luigi.png'),
+      'wario':p.loadImage('./assets/img/wanted/suspects/wario.png'),
+    }
   }
 
   setup() {
@@ -59,17 +66,60 @@ class Wanted extends Default {
       case 0: // 犯人選出
         if (this.count === 0) {
           this.election();
+          this.count++;
         }
 
-        p.image(this.backgroundImg, 0, 0);
-        p.image(this.characterImgs[this.culprit], (config.width / 2) - this.size, (config.height / 2) - this.size, this.size, this.size);
+        p.background(0);
+        
+        p.fill(255); // 黒い円を描画
+        p.ellipse(this.light['left'], config.height / 2, this.lightSize, this.lightSize);
 
-        if (this.count > 60) {
-          this.count = 0;
-          this.flow = 1;
-          time.start();
-        } else {
-          this.count++;
+        p.push();
+        p.drawingContext.clip();
+        p.imageMode(p.CENTER);
+        p.image(this.backgroundImg, (config.width / 2), (config.height / 2), config.width, this.backgroundImg.height + (config.width - this.backgroundImg.width ) );
+        p.image(this.suspectImgs[this.culprit], (config.width / 2), (config.height / 2) - 17, 115, 115);
+        p.pop();
+
+        p.ellipse(this.light['right'], config.height / 2, this.lightSize, this.lightSize);
+        p.push();
+        p.drawingContext.clip();
+        p.imageMode(p.CENTER);
+        p.image(this.backgroundImg, (config.width / 2), (config.height / 2), config.width, this.backgroundImg.height + (config.width - this.backgroundImg.width ) );
+        p.image(this.suspectImgs[this.culprit], (config.width / 2), (config.height / 2) - 17, 115, 115);
+        p.pop();
+
+        switch (this.lightMove) {
+          case 0:
+            if (this.light['left'] > config.width + (this.lightSize / 2)) {
+              this.lightMove = 1;
+            } else {
+              this.light['left'] += this.lightSpeed;
+              this.light['right'] -= this.lightSpeed;
+            }
+            break;
+          case 1:
+            if ((this.light['right'] + this.lightSpeed) > (config.width / 2)) {
+              this.light['left'] = config.width / 2;
+              this.light['right'] = config.width / 2;
+              this.lightMove = 2;
+            } else {
+              this.light['left'] -= this.lightSpeed;
+              this.light['right'] += this.lightSpeed;
+            }
+            break;
+          case 2:
+            controller.click(() => {
+              this.light['left'] = config.width + (this.lightSize / 2);
+              this.light['right'] = -(this.lightSize / 2);
+              this.lightMove = 1;
+              this.flow = 1;
+              this.count = 0;
+              time.start();
+            });
+            break;
+          default:
+            break;
         }
         break;
       case 1: // プレイ中
@@ -100,6 +150,13 @@ class Wanted extends Default {
           this.miss['miss'] = true;
           this.miss = false;
         }
+
+        p.fill(255);
+        p.textSize(30);
+        p.strokeWeight(10);
+        p.stroke(0);
+        p.textAlign(p.LEFT, p.TOP);
+        p.text(time.get(), 5, 5);
         break;
       case 2: // 答え合わせ
         if (this.count === 0) {
@@ -132,12 +189,6 @@ class Wanted extends Default {
       default:
         break;
     }
-    p.fill(255);
-    p.textSize(30);
-    p.strokeWeight(10);
-    p.stroke(0);
-    p.textAlign(p.LEFT, p.TOP);
-    p.text(time.get(), 5, 5);
   }
 
   controller() {
