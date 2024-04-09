@@ -21,8 +21,8 @@ class Controller {
     func,
     x = 0,
     y = 0,
-    w = windowWidth,
-    h = windowHeight
+    w = config.width,
+    h = config.height
   ) {
     this.clickList.push({
       'func':func,
