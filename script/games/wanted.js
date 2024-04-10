@@ -158,7 +158,7 @@ class Wanted extends Default {
             suspect['missCount']++;
           }
 
-          this.move(suspect);
+          this.move(suspect, p);
         });
 
         if (this.miss) {
@@ -302,7 +302,10 @@ class Wanted extends Default {
         position['x'],
         position['y'],
         moveX,
-        moveY
+        moveY,
+        charactersMove[character]['amplitude'],
+        charactersMove[character]['speed'],
+        charactersMove[character]['angle'],
       ));
     })
   }
@@ -311,7 +314,7 @@ class Wanted extends Default {
   setMoveMode() {
     let probability;
     const random =  Math.floor( Math.random() * 4 );
-    switch (random) {
+    switch (3) {
       case 0: // 停止状態
         this.moveMode = 'stop';
         probability = 0.15;
@@ -349,6 +352,9 @@ class Wanted extends Default {
       'top-left',
       'top-right',
     ];
+    let amplitude;
+    let speed;
+    let angle;
 
     this.characters.forEach((character) => {
       if (this.moveMode === 'stop') {
@@ -426,12 +432,23 @@ class Wanted extends Default {
           default:
             break;
         }
+      } else if (this.moveMode === 'wave') {
+        moveX = 0;
+        moveY = character['speed'];
+
+        amplitude = Math.floor( Math.random() * ( 50 - 25 ) + 25 );
+        speed =  Math.random() * ( 0.08 - 0.025 ) + 0.025;
+        angle = Math.random() * 3.14;
       }
       
-      charactersMove[character['name']] = {
-        'moveX':moveX,
-        'moveY':moveY
-      }
+      charactersMove[character['name']] = new Character(
+        character['name'],
+        moveX,
+        moveY,
+        amplitude,
+        speed,
+        angle
+      );
     })
     return charactersMove;
   }
@@ -447,10 +464,14 @@ class Wanted extends Default {
     return array;
   }
 
-  move(suspect) {
+  move(suspect, p) {
     if (this.moveMode === 'wave') {
-      suspect.x += suspect.moveX;
+      suspect.x = suspect.center + suspect.amplitude * p.cos(suspect.angle);
       suspect.y += suspect.moveY;
+      suspect.angle += suspect.speed;
+      if (suspect.angle >= p.TWO_PI) {
+        suspect.angle = 0;
+      }
     } else {
       suspect.x += suspect.moveX;
       suspect.y += suspect.moveY;
@@ -510,9 +531,9 @@ class Suspect {
     y,
     moveX,
     moveY,
-    wave = false,
     amplitude = 0,
     speed = 0,
+    angle = 0
   ) {
     this.character = character;
     this.x = x;
@@ -521,5 +542,25 @@ class Suspect {
     this.moveY = moveY;
     this.amplitude = amplitude;
     this.speed = speed;
+    this.center = x;
+    this.angle = angle;
+  }
+}
+
+class Character {
+  constructor(
+    character,
+    moveX,
+    moveY,
+    amplitude = 0,
+    speed = 0,
+    angle = 0,
+  ) {
+    this.character = character;
+    this.moveX = moveX;
+    this.moveY = moveY;
+    this.amplitude = amplitude;
+    this.speed = speed;
+    this.angle = angle;
   }
 }
