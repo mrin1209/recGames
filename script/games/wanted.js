@@ -26,7 +26,6 @@ class Wanted extends Default {
   marginX = 29.8;
   marginY = 30.3;
   size = 50;
-  reflection;
   count = 0;
   setUp = false;
   viewText = false;
@@ -125,13 +124,15 @@ class Wanted extends Default {
             }
 
             if (this.viewText) {
+              p.push();
+              p.imageMode(p.CENTER);
               p.image(
                 this.touch_to_start,
-                config.width - this.touch_to_start.width - 10,
-                config.height - this.touch_to_start.height - 10
+                config.width / 2,
+                config.height / 2 + 150,
               );
+              p.pop();
             }
-            
             break;
           default:
             break;
@@ -230,19 +231,18 @@ class Wanted extends Default {
   // 座標生成
   generate(characters) {
     this.suspects = [];
-    let moveMode;
-    let probability;
     let positionX = -8;
     let positionY = this.marginY;
     let x;
     let y;
     let moveX;
     let moveY;
+    let positionList = [];
     let character;
 
-    [moveMode, probability, this.reflection] = this.setMoveMode();
+    let probability = this.setMoveMode();
 
-    const charactersMove = this.setMove(moveMode);
+    const charactersMove = this.setMove();
 
     for (let loopY = 0; loopY < 20; loopY++) {
       for (let loopX = 0; loopX < 13; loopX++) {
@@ -259,7 +259,7 @@ class Wanted extends Default {
 
         positionX += this.marginX;
 
-        this.suspects.push({
+        positionList.push({
           'x':x,
           'y':y,
         });
@@ -268,9 +268,9 @@ class Wanted extends Default {
       positionY += this.marginY;
     }
 
-    this.suspects = this.arrayShuffle(this.suspects);
+    positionList = this.arrayShuffle(positionList);
 
-    this.suspects.forEach((suspect, index) => {
+    positionList.forEach((position, index) => {
       // キャラクター選択
       if (index === 0) {
         character = this.culprit;
@@ -283,7 +283,7 @@ class Wanted extends Default {
       moveX = charactersMove[character]['moveX'];
       moveY = charactersMove[character]['moveY'];
 
-      if (moveMode === 'radial') {
+      if (this.moveMode === 'radial') {
         if (Math.floor( Math.random() * 2 )) {
           [moveX, moveY] = [moveY, moveX];
         }
@@ -297,45 +297,49 @@ class Wanted extends Default {
         }
       }
 
-      suspect['character'] = character;
-      suspect['moveX'] = moveX;
-      suspect['moveY'] = moveY;
-      suspect['view'] = true;
-      suspect['miss'] = false;
-      suspect['missCount'] = 0;
+      this.suspects.push(new Suspect(
+        character,
+        position['x'],
+        position['y'],
+        moveX,
+        moveY
+      ));
     })
   }
 
   // 挙動選択
   setMoveMode() {
-    let moveMode;
     let probability;
-    let reflection;
-    const random =  Math.floor( Math.random() * 3 );
+    const random =  Math.floor( Math.random() * 4 );
     switch (random) {
       case 0: // 停止状態
-        moveMode = 'stop';
+        this.moveMode = 'stop';
         probability = 0.15;
-        reflection = false;
+        this.reflection = false;
         break;
       case 1: // 直線移動
-        moveMode = 'straight';
+        this.moveMode = 'straight';
         probability = 0.05;
-        reflection = false;
+        this.reflection = false;
         break;
       case 2: // 放射移動
-        moveMode = 'radial';
+        this.moveMode = 'radial';
         probability = 0.1;
-        reflection = true;
+        this.reflection = true;
+        break;
+      case 3: // 振り子移動
+        this.moveMode = 'wave';
+        probability = 0.1;
+        this.reflection = false;
         break;
       default:
         break;
     }
 
-    return [moveMode, probability, reflection];
+    return probability;
   }
 
-  setMove(moveMode) {
+  setMove() {
     let charactersMove = [];
     let moveX;
     let moveY;
@@ -347,10 +351,10 @@ class Wanted extends Default {
     ];
 
     this.characters.forEach((character) => {
-      if (moveMode === 'stop') {
+      if (this.moveMode === 'stop') {
         moveX = 0;
         moveY = 0;
-      } else if (moveMode === 'straight') {
+      } else if (this.moveMode === 'straight') {
         const random = Math.floor( Math.random() * direction.length );
   
         switch (direction[random]) {
@@ -399,7 +403,7 @@ class Wanted extends Default {
         }
 
         direction.splice(random, 1);
-      } else if (moveMode === 'radial') {
+      } else if (this.moveMode === 'radial') {
         switch(Math.floor( Math.random() * 3 )) {
           case 0:
             moveX = Math.random();
@@ -444,8 +448,13 @@ class Wanted extends Default {
   }
 
   move(suspect) {
-    suspect.x += suspect.moveX;
-    suspect.y += suspect.moveY;
+    if (this.moveMode === 'wave') {
+      suspect.x += suspect.moveX;
+      suspect.y += suspect.moveY;
+    } else {
+      suspect.x += suspect.moveX;
+      suspect.y += suspect.moveY;
+    }
     
     if (this.reflection) {
       if (suspect.x < 0 - this.size || suspect.x > config.width) {
@@ -487,5 +496,30 @@ class Wanted extends Default {
   timeUp() {
     this.suspects = this.suspects[0];
     this.flow = 2;
+  }
+}
+
+class Suspect {
+  view = true;
+  miss = false;
+  missCount = 0;
+
+  constructor(
+    character,
+    x,
+    y,
+    moveX,
+    moveY,
+    wave = false,
+    amplitude = 0,
+    speed = 0,
+  ) {
+    this.character = character;
+    this.x = x;
+    this.y = y;
+    this.moveX = moveX;
+    this.moveY = moveY;
+    this.amplitude = amplitude;
+    this.speed = speed;
   }
 }
