@@ -1,6 +1,7 @@
 class Menu extends Default {
   #games = {
-    'wanted':Wanted,
+    // 'wanted':Wanted,
+    'where':Where,
   };
 
   #titles = [];
@@ -18,7 +19,7 @@ class Menu extends Default {
     $gameKeys.forEach((title) => {
       const $key = title;
       const $game = this.#games[$key];
-      const $image = p.loadImage(`./assets/img/${$key}/title.jpg`);
+      const $image = p.loadImage(`./assets/img/${$key}/title.png`);
 
 
       this.#titles.push({
