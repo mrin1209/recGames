@@ -15,7 +15,7 @@ class Where extends Default {
   ];
   suspects = []; // 容疑者一覧
   culprit; // 犯人
-  characterNum = 200;
+  characterNum = 20;
   miss = false;
   flow = 0;  // 0:容疑者選出 1:選別中 2:正解 3:ゲームオーバー
   size = 50;
@@ -102,6 +102,7 @@ class Where extends Default {
                 this.flow = 1;
                 this.count = 0;
                 this.setUp = false;
+                this.characterNum += 20;
                 time.start();
               });
               this.setUp = true;
@@ -141,7 +142,7 @@ class Where extends Default {
 
           if (suspect.touche) {
             index = index;
-            p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size + 5, this.size + 5);
+            p.image(this.characterImgs[suspect.character], suspect.x - 2.5, suspect.y - 2.5, this.size + 5, this.size + 5);
           } else {
             p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size, this.size);
           }
@@ -158,6 +159,22 @@ class Where extends Default {
             this.touche['touche'] = true;
             this.touche['x'] = p.touches[0]['x'] - this.size / 2;
             this.touche['y'] = p.touches[0]['y'] - this.size / 2;
+            
+            if (this.touche['x'] < 0) {
+              this.touche['x'] = 0;
+            }
+
+            if (this.touche['x'] > config.width - this.size) {
+              this.touche['x'] = config.width - this.size;
+            }
+      
+            if (this.touche['y'] < 0) {
+              this.touche['y'] = 0;
+            }
+
+            if (this.touche['y'] > config.height - this.size) {
+              this.touche['y'] = config.height - this.size;
+            }
           }
         } else if (this.touche) {
           this.touche['touche'] = false;
