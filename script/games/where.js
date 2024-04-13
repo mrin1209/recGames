@@ -138,6 +138,22 @@ class Where extends Default {
         p.background(0);
 
         this.suspects.forEach((suspect, index) => {
+          if (suspect['x'] < 0) {
+            suspect['x'] = 0;
+          }
+
+          if (suspect['x'] > config.width - this.size) {
+            suspect['x'] = config.width - this.size;
+          }
+    
+          if (suspect['y'] < 0) {
+            suspect['y'] = 0;
+          }
+
+          if (suspect['y'] > config.height - this.size) {
+            suspect['y'] = config.height - this.size;
+          }
+          
           controller.click(() => { this.touche = suspect; }, suspect.x, suspect.y, this.size, this.size);
 
           if (suspect.touche) {
@@ -145,6 +161,26 @@ class Where extends Default {
             p.image(this.characterImgs[suspect.character], suspect.x - 2.5, suspect.y - 2.5, this.size + 5, this.size + 5);
           } else {
             p.image(this.characterImgs[suspect.character], suspect.x, suspect.y, this.size, this.size);
+          }
+
+          if (suspect.isMoving) {
+            suspect.x += suspect['moveX'];
+            suspect['moveX'] *= 0.95;
+  
+            suspect.y += suspect['moveY'];
+            suspect['moveY'] *= 0.95;
+  
+            if (p.abs(suspect['moveX']) < 0.1 && p.abs(suspect['moveY']) < 0.1) {
+              suspect.isMoving = false;
+            }
+
+            if (suspect.x < 0 || suspect.x > config.width - this.size) {
+              suspect.moveX = -(suspect.moveX);
+            }
+      
+            if (suspect.y < 0 || suspect.y > config.height - this.size) {
+              suspect.moveY = -(suspect.moveY);
+            }
           }
         });
         
@@ -159,25 +195,14 @@ class Where extends Default {
             this.touche['touche'] = true;
             this.touche['x'] = p.touches[0]['x'] - this.size / 2;
             this.touche['y'] = p.touches[0]['y'] - this.size / 2;
-            
-            if (this.touche['x'] < 0) {
-              this.touche['x'] = 0;
-            }
 
-            if (this.touche['x'] > config.width - this.size) {
-              this.touche['x'] = config.width - this.size;
-            }
-      
-            if (this.touche['y'] < 0) {
-              this.touche['y'] = 0;
-            }
-
-            if (this.touche['y'] > config.height - this.size) {
-              this.touche['y'] = config.height - this.size;
-            }
+            let swipeStrength = p.dist(p.mouseX, p.mouseY, p.pmouseX, p.pmouseY); // スワイプの速さを計算
+            this.touche['moveX'] = (p.mouseX - p.pmouseX) * swipeStrength * 0.1; // X方向の速度
+            this.touche['moveY'] = (p.mouseY - p.pmouseY) * swipeStrength * 0.1; // Y方向の速度
           }
         } else if (this.touche) {
           this.touche['touche'] = false;
+          this.touche.isMoving = true;
           this.touche = false;
         }
 
@@ -298,6 +323,9 @@ class Where extends Default {
 
 class Suspect {
   touche = false;
+  moveX = 0;
+  moveY = 0;
+  isMoving = false;
 
   constructor(
     character,
