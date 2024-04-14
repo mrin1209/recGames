@@ -2,21 +2,27 @@ class Wanted extends Default {
   characters = [
     {
       'name':'mario',
-      'speed':2
+      'speed':2,
+      'amplitude':28,
+      'frequency':0.12
     },
     {
       'name':'yoshi',
-      'speed':1.65
+      'speed':1.65,
+      'amplitude':25,
+      'frequency':0.1
     },
     {
       'name':'luigi',
-      'img':[69,178,69],
-      'speed':1.35
+      'speed':1.35,
+      'amplitude':22,
+      'frequency':0.08
     },
     {
       'name':'wario',
-      'img':[255,206,41],
-      'speed':1
+      'speed':1,
+      'amplitude':20,
+      'frequency':0.06
     },
   ];
   suspects = []; // 容疑者一覧
@@ -304,7 +310,7 @@ class Wanted extends Default {
         moveX,
         moveY,
         charactersMove[character]['amplitude'],
-        charactersMove[character]['speed'],
+        charactersMove[character]['frequency'],
         charactersMove[character]['angle'],
       ));
     })
@@ -314,7 +320,7 @@ class Wanted extends Default {
   setMoveMode() {
     let probability;
     const random =  Math.floor( Math.random() * 4 );
-    switch (3) {
+    switch (random) {
       case 0: // 停止状態
         this.moveMode = 'stop';
         probability = 0.15;
@@ -352,8 +358,6 @@ class Wanted extends Default {
       'top-left',
       'top-right',
     ];
-    let amplitude;
-    let speed;
     let angle;
 
     this.characters.forEach((character) => {
@@ -434,19 +438,21 @@ class Wanted extends Default {
         }
       } else if (this.moveMode === 'wave') {
         moveX = 0;
-        moveY = character['speed'];
+        if (Math.floor( Math.random() * 2 )) {
+          moveY = character['speed'];
+        } else {
+          moveY = -character['speed'];
+        }
 
-        amplitude = Math.floor( Math.random() * ( 50 - 25 ) + 25 );
-        speed =  Math.random() * ( 0.08 - 0.025 ) + 0.025;
-        angle = Math.random() * 3.14;
+        angle = Math.random() * 6.283185307179586;
       }
       
       charactersMove[character['name']] = new Character(
         character['name'],
         moveX,
         moveY,
-        amplitude,
-        speed,
+        character['amplitude'],
+        character['frequency'],
         angle
       );
     })
@@ -468,7 +474,7 @@ class Wanted extends Default {
     if (this.moveMode === 'wave') {
       suspect.x = suspect.center + suspect.amplitude * p.cos(suspect.angle);
       suspect.y += suspect.moveY;
-      suspect.angle += suspect.speed;
+      suspect.angle += suspect.frequency;
       if (suspect.angle >= p.TWO_PI) {
         suspect.angle = 0;
       }
@@ -532,7 +538,7 @@ class Suspect {
     moveX,
     moveY,
     amplitude = 0,
-    speed = 0,
+    frequency = 0,
     angle = 0
   ) {
     this.character = character;
@@ -541,7 +547,7 @@ class Suspect {
     this.moveX = moveX;
     this.moveY = moveY;
     this.amplitude = amplitude;
-    this.speed = speed;
+    this.frequency = frequency;
     this.center = x;
     this.angle = angle;
   }
@@ -553,14 +559,14 @@ class Character {
     moveX,
     moveY,
     amplitude = 0,
-    speed = 0,
+    frequency = 0,
     angle = 0,
   ) {
     this.character = character;
     this.moveX = moveX;
     this.moveY = moveY;
     this.amplitude = amplitude;
-    this.speed = speed;
+    this.frequency = frequency;
     this.angle = angle;
   }
 }
