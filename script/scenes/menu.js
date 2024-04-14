@@ -7,7 +7,7 @@ import games from '../engine/games.js';
 export default class Menu extends Default {
   #games = {
     'wanted':titles.Wanted,
-    // 'where':Where,
+    'where':titles.Where,
   };
 
   #titles = [];

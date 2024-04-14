@@ -1,4 +1,9 @@
-class Where extends Default {
+import Default from '../engine/default.js';
+import config from '../engine/config.js';
+import controller from '../engine/controller.js';
+import time from '../engine/time.js';
+
+export default class Where extends Default {
   characters = [
     {
       'name':'mario',
