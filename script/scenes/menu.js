@@ -1,6 +1,12 @@
-class Menu extends Default {
+import * as titles from '../games/title.js';
+
+import Default from '../engine/default.js';
+import controller from '../engine/controller.js';
+import games from '../engine/games.js';
+
+export default class Menu extends Default {
   #games = {
-    'wanted':Wanted,
+    'wanted':titles.Wanted,
     // 'where':Where,
   };
 

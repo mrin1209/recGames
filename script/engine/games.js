@@ -1,8 +1,15 @@
+import Menu from '../scenes/menu.js';
+import controller from '../engine/controller.js';
+import time from '../engine/time.js';
+
 class Games {
   #scene;
 
   // ゲームスタート
-  run(p,title) {
+  run(
+    p,
+    title = Menu
+  ) {
     controller.reset();
 
     this.#scene = new title;
@@ -40,3 +47,5 @@ class Games {
 
   }
 }
+
+export default new Games;

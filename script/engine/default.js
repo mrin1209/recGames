@@ -1,4 +1,4 @@
-class Default {
+export default class Default {
   #title;
   #id;
 

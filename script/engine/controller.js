@@ -1,3 +1,5 @@
+import config from '../engine/config.js';
+
 class Controller {
   clickList = [];
   
@@ -33,3 +35,5 @@ class Controller {
     });
   }
 }
+
+export default new Controller;

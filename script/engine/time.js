@@ -1,3 +1,5 @@
+import config from '../engine/config.js';
+
 class Time {
   time = 0;
   endPoint = 0;
@@ -97,3 +99,5 @@ class Time {
     return Math.ceil(this.time / 30);
   }
 }
+
+export default new Time;
